@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LibraryManager.API.Models;
+using LibraryManager.API.Models.Dto;
 
 namespace LibraryManager.API.Controllers
 {
@@ -40,6 +41,56 @@ namespace LibraryManager.API.Controllers
 
             return book;
         }
+
+        //Get("GetAvailableBooks")
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetAvailableBooks()
+        {
+            var result = from book in _context.Books
+                         join txn in _context.Transactions on book.BookId equals txn.BookId into Txns
+                         from m in Txns.DefaultIfEmpty()
+                             // where m.TxnStatusId != 1 
+                         select new BookDto
+                         {
+                             BookId = book.BookId,
+                             ISBN = book.Isbn,
+                             Titile = book.Title,
+                             Author = book.Author,
+                         };
+
+            //var result = from txn in _context.Transactions
+            //             join book in _context.Books on   txn.BookId equals book.BookId into Txns
+            //             from m in Txns.DefaultIfEmpty()
+            //                 // where m.TxnStatusId != 1 
+            //             select new BookDto
+            //             {
+            //                 BookId = m.BookId,
+            //                 ISBN = m.Isbn,
+            //                 Titile = m.Title,
+            //                 Author = m.Author,
+            //             };
+
+
+
+            //SELECT t1.ID FROM Table1 t1 WHERE NOT EXISTS(SELECT t2.ID FROM Table2 t2 WHERE t1.ID = t2.ID)
+            return await result.ToListAsync();
+
+            //return await _context.Books.Where(x => x.Transactions. == 1).OrderByDescending(x => x.CheckoutDate).Select(s => new CheckoutItem
+            //{
+            //    TxnId = s.TxnId,
+            //    BookId = s.BookId,
+            //    BookTitile = s.Book.Title,
+            //    Author = s.Book.Author,
+            //    UserId = s.UserId,
+            //    UserFullName = s.User.FullName,
+            //    CheckoutDate = s.CheckoutDate,
+            //    DueDate = s.DueDate,
+            //    ISBN = s.Book.Isbn,
+            //    LastRenewedDate = s.LastRenewedDate
+            //}).ToListAsync();
+        }
+
 
         // PUT: api/Books/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

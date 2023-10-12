@@ -10,6 +10,7 @@ namespace LibraryManager.API.Models.Dto
         public int TxnId { get; set; }
         public int? BookId { get; set; }
         public int ISBN { get; set; }
+        public string Author { get; set; }
         public string BookTitile { get; set; }
         public int? UserId { get; set; }
         public string UserFullName { get; set; }

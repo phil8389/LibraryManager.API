@@ -52,6 +52,7 @@ namespace LibraryManager.API.Controllers
                 TxnId = s.TxnId,
                 BookId = s.BookId,
                 BookTitile = s.Book.Title,
+                Author = s.Book.Author,
                 UserId = s.UserId,
                 UserFullName = s.User.FullName,
                 CheckoutDate = s.CheckoutDate,
@@ -60,6 +61,9 @@ namespace LibraryManager.API.Controllers
                 LastRenewedDate = s.LastRenewedDate
             }).ToListAsync();
         }
+
+
+       
 
         // PUT: api/Transactions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
