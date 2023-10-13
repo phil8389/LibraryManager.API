@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace LibraryManager.API.Models.Dto
 {
-    public class CheckoutItem
+    public class CheckoutDto
     {
         public int TxnId { get; set; }
         public int? BookId { get; set; }
         public int ISBN { get; set; }
         public string Author { get; set; }
-        public string BookTitile { get; set; }
+        public string BookTitle { get; set; }
         public int? UserId { get; set; }
         public string UserFullName { get; set; }
         public DateTime? CheckoutDate { get; set; }

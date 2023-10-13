@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LibraryManager.API.Models;
 using LibraryManager.API.Models.Dto;
+using System.Web;
 
 namespace LibraryManager.API.Controllers
 {
@@ -45,25 +46,36 @@ namespace LibraryManager.API.Controllers
         //Get("GetCheckoutItems")
         [HttpGet]
         [Route("[action]")]
-        public async Task<ActionResult<IEnumerable<CheckoutItem>>> GetCheckoutItems()
+        public async Task<ActionResult<IEnumerable<CheckoutDto>>> GetCheckoutItems()
         {
-            return await _context.Transactions.Where(x => x.TxnStatusId == 1).OrderByDescending(x => x.CheckoutDate).Select(s => new CheckoutItem
+            return await _context.Transactions.Where(x => x.TxnStatusId == 1 || x.TxnStatusId == 2).OrderByDescending(x => x.CheckoutDate).Select(s => new CheckoutDto
             {
                 TxnId = s.TxnId,
                 BookId = s.BookId,
-                BookTitile = s.Book.Title,
+                ISBN = s.Book.Isbn,
+                BookTitle = s.Book.Title,
                 Author = s.Book.Author,
                 UserId = s.UserId,
                 UserFullName = s.User.FullName,
                 CheckoutDate = s.CheckoutDate,
-                DueDate = s.DueDate,
-                ISBN = s.Book.Isbn,
+                DueDate = s.DueDate,               
                 LastRenewedDate = s.LastRenewedDate
             }).ToListAsync();
         }
 
+        [HttpGet()]
+        [Route("[action]/{isbn}/{bookid}")]
+        public async Task<ActionResult<bool>> CheckIfBookIsAlreadyOut(string isbn, int bookid)
+        {
+            var result = await _context.Transactions.Where(x => x.Book.Isbn == Convert.ToInt32(HttpUtility.UrlDecode(isbn))
+            && (x.TxnStatusId == 1)).ToListAsync();
 
-       
+            if (result.Any())
+                return true;
+            return false;
+        }
+
+
 
         // PUT: api/Transactions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -95,6 +107,8 @@ namespace LibraryManager.API.Controllers
 
             return NoContent();
         }
+
+
 
         // POST: api/Transactions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

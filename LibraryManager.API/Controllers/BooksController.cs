@@ -42,6 +42,20 @@ namespace LibraryManager.API.Controllers
             return book;
         }
 
+        //Get("GetBookByISBN")
+        [HttpGet]
+        [Route("[action]/{isbn}")]
+        public async Task<ActionResult<Book>> GetBookByISBN(int isbn)
+        {
+            var book = await _context.Books.Where(x => x.Isbn == isbn).FirstOrDefaultAsync();
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            return book;
+        }
         //Get("GetAvailableBooks")
         [HttpGet]
         [Route("[action]")]
@@ -55,7 +69,7 @@ namespace LibraryManager.API.Controllers
                          {
                              BookId = book.BookId,
                              ISBN = book.Isbn,
-                             Titile = book.Title,
+                             Title = book.Title,
                              Author = book.Author,
                          };
 
