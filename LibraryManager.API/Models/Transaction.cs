@@ -13,6 +13,7 @@ namespace LibraryManager.API.Models
         public DateTime? CheckoutDate { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime? LastRenewedDate { get; set; }
+        public int? RenewalCount { get; set; }
         public DateTime? ReturnedDate { get; set; }
         public int? TxnStatusId { get; set; }
         public DateTime? StatusDate { get; set; }

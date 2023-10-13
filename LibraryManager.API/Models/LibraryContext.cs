@@ -64,6 +64,8 @@ namespace LibraryManager.API.Models
 
                 entity.Property(e => e.LastRenewedDate).HasColumnType("datetime");
 
+               // entity.Property(e => e.RenewalCount).HasColumnName("RenewalCount");
+
                 entity.Property(e => e.ReturnedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StatusDate).HasColumnType("datetime");

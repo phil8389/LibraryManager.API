@@ -17,7 +17,32 @@ namespace LibraryManager.API.Models.Dto
         public DateTime? CheckoutDate { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime? LastRenewedDate { get; set; }
-        // public DateTime ReturnedDate { get; set; }
-       // public DateTime dateTime { get; set; }
+        public int? RenewalCount { get; set; }
+
+
+        public bool? IsOverDue
+        {
+            get
+            {
+                if (this.DueDate == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    if (this.DueDate < DateTime.Today)
+                    {
+                        return true;
+
+                    }
+                    else { return false; }
+                }
+            }
+
+        }
     }
+
+    // public DateTime ReturnedDate { get; set; }
+    // public DateTime dateTime { get; set; }
+
 }

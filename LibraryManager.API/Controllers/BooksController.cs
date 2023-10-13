@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LibraryManager.API.Models;
 using LibraryManager.API.Models.Dto;
+using System.Web;
+using Newtonsoft.Json.Linq;
 
 namespace LibraryManager.API.Controllers
 {
@@ -56,22 +58,76 @@ namespace LibraryManager.API.Controllers
 
             return book;
         }
+
+        [HttpGet()]
+        [Route("[action]/{isbn}")]
+        public async Task<ActionResult<bool>> CheckIfISBNIsValid(int isbn)
+        {
+            //int isbnNo;
+            //bool success = int.TryParse(HttpUtility.UrlDecode(isbn), out isbnNo);
+            //if(!success)
+            //{
+            //    return false;
+            //}
+
+            var result = await _context.Books.Where(x => x.Isbn == isbn).ToListAsync();
+
+            if (result.Any())
+                return true;
+            return false;
+        }
+
+
         //Get("GetAvailableBooks")
         [HttpGet]
         [Route("[action]")]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetAvailableBooks()
         {
-            var result = from book in _context.Books
-                         join txn in _context.Transactions on book.BookId equals txn.BookId into Txns
-                         from m in Txns.DefaultIfEmpty()
-                             // where m.TxnStatusId != 1 
-                         select new BookDto
-                         {
-                             BookId = book.BookId,
-                             ISBN = book.Isbn,
-                             Title = book.Title,
-                             Author = book.Author,
-                         };
+            var books = _context.Books.Select(book => new BookDto
+            {
+                BookId = book.BookId,
+                ISBN = book.Isbn,
+                Title = book.Title,
+                Author = book.Author,
+                Category = book.Category,
+                PublishedYear = book.PublishedYear,
+                Publisher = book.Publisher,
+                Price = book.Price,
+            }
+                ).ToList();
+
+            var checkoutBooks = _context.Transactions.Where(x => x.TxnStatusId == 1 || x.TxnStatusId == 2).Select(s => new BookDto
+            {
+                BookId = s.Book.BookId,
+                ISBN = s.Book.Isbn,
+                Title = s.Book.Title,
+                Author = s.Book.Author,
+                Category = s.Book.Category,
+                PublishedYear = s.Book.PublishedYear,
+                Publisher = s.Book.Publisher,
+                 Price = s.Book.Price,
+            }).ToList(); 
+
+            // var books = _context.Books.con;
+           // var checkoutBooks = _context.Transactions.Where(x => x.TxnStatusId == 1 || x.TxnStatusId == 2).Select(x=>x.Book);
+
+            var resultedBooks = books.Except(checkoutBooks, new BookComparer());
+            return resultedBooks.ToList();
+
+            // var res = books.Except()
+
+
+            //var result = from book in _context.Books
+            //             join txn in _context.Transactions on book.BookId equals txn.BookId into Txns
+            //             from m in Txns.DefaultIfEmpty()
+            //                 // where m.TxnStatusId != 1 
+            //             select new BookDto
+            //             {
+            //                 BookId = book.BookId,
+            //                 ISBN = book.Isbn,
+            //                 Title = book.Title,
+            //                 Author = book.Author,
+            //             };
 
             //var result = from txn in _context.Transactions
             //             join book in _context.Books on   txn.BookId equals book.BookId into Txns
@@ -87,8 +143,6 @@ namespace LibraryManager.API.Controllers
 
 
 
-            //SELECT t1.ID FROM Table1 t1 WHERE NOT EXISTS(SELECT t2.ID FROM Table2 t2 WHERE t1.ID = t2.ID)
-            return await result.ToListAsync();
 
             //return await _context.Books.Where(x => x.Transactions. == 1).OrderByDescending(x => x.CheckoutDate).Select(s => new CheckoutItem
             //{

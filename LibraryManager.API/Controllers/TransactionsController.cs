@@ -48,7 +48,7 @@ namespace LibraryManager.API.Controllers
         [Route("[action]")]
         public async Task<ActionResult<IEnumerable<CheckoutDto>>> GetCheckoutItems()
         {
-            return await _context.Transactions.Where(x => x.TxnStatusId == 1 || x.TxnStatusId == 2).OrderByDescending(x => x.CheckoutDate).Select(s => new CheckoutDto
+            return await _context.Transactions.Where(x => x.TxnStatusId == 1 || x.TxnStatusId == 2).Select(s => new CheckoutDto
             {
                 TxnId = s.TxnId,
                 BookId = s.BookId,
@@ -59,22 +59,63 @@ namespace LibraryManager.API.Controllers
                 UserFullName = s.User.FullName,
                 CheckoutDate = s.CheckoutDate,
                 DueDate = s.DueDate,               
-                LastRenewedDate = s.LastRenewedDate
-            }).ToListAsync();
+                LastRenewedDate = s.LastRenewedDate,
+                RenewalCount = s.RenewalCount
+            }).OrderByDescending(x => x.CheckoutDate).ToListAsync();
         }
 
         [HttpGet()]
         [Route("[action]/{isbn}/{bookid}")]
-        public async Task<ActionResult<bool>> CheckIfBookIsAlreadyOut(string isbn, int bookid)
+        public async Task<ActionResult<bool>> CheckIfBookIsAlreadyOut(int isbn, int bookid)
         {
-            var result = await _context.Transactions.Where(x => x.Book.Isbn == Convert.ToInt32(HttpUtility.UrlDecode(isbn))
-            && (x.TxnStatusId == 1)).ToListAsync();
+            var result = await _context.Transactions.Where(x => x.Book.Isbn == isbn
+            && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).ToListAsync();
 
             if (result.Any())
                 return true;
             return false;
         }
 
+        //[HttpGet()]
+        //[Route("[action]/{isbn}")]
+        //public async Task<ActionResult<bool>> CheckIfBookCanBeRenewed(int isbn)
+        //{
+        //    //   var result = await _context.Transactions.Where(x => x.Book.Isbn == isbn
+        //    //&& (x.TxnStatusId == 1 || x.TxnStatusId == 2)).ToListAsync();
+
+        //    //   if (result.Any())
+        //    //       return true;
+        //    //   return false;
+
+        //    var txn = await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).FirstOrDefaultAsync();
+        //    if (txn == null) return false;
+        //    if (txn.RenewalCount >= 6)
+        //    {
+        //        return false;
+        //    }
+
+        //    return true;
+
+        //}
+
+        [HttpGet()]
+        [Route("[action]/{isbn}")]
+        public async Task<ActionResult<Transaction>> CheckIfBookCanBeRenewed(int isbn)
+        {          
+
+            return await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).FirstOrDefaultAsync();
+          
+
+        }
+
+        [HttpGet()]
+        [Route("[action]/{isbn}")]
+        public async Task<ActionResult<Transaction>> GetActiveTransaction(int isbn)
+        {
+            return await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).FirstOrDefaultAsync();
+
+
+        }
 
 
         // PUT: api/Transactions/5
