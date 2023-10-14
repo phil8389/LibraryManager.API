@@ -29,7 +29,7 @@ namespace LibraryManager.API
         {
 
             services.AddControllers();
-            services.AddCors(options => options.AddPolicy("TheCodeBuzzPolicy", builder =>
+            services.AddCors(options => options.AddPolicy("MyCorsPolicy", builder =>
             {
                 builder.SetIsOriginAllowed((host) => true)
                         .SetIsOriginAllowed(origin => true)
@@ -41,14 +41,7 @@ namespace LibraryManager.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LibraryManager.API", Version = "v1" });
             });
-            services.AddDbContext<LibraryContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:LibraryManagerConnStr"]));
-
-            //Custom ArraySupportingRouteValueProviderFactory is added inorder to support array input parameter(comma seperated) in the get request
-            //services.AddControllersWithViews(mvc =>
-            //{
-            //    mvc.ValueProviderFactories.RemoveType<RouteValueProviderFactory>();
-            //    mvc.ValueProviderFactories.Add(new ArraySupportingRouteValueProviderFactory());
-            //}).AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            services.AddDbContext<LibraryContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:LibraryManagerConnStr"]));         
 
         }
 
@@ -63,9 +56,7 @@ namespace LibraryManager.API
             }
 
             app.UseRouting();
-
-            app.UseAuthorization();
-            app.UseCors("TheCodeBuzzPolicy");
+            app.UseCors("MyCorsPolicy");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

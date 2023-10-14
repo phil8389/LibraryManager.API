@@ -29,7 +29,7 @@ namespace LibraryManager.API.Controllers
             return await _context.Transactions.ToListAsync();
         }
 
-        // GET: api/Transactions/5
+        // GET
         [HttpGet("{id}")]
         public async Task<ActionResult<Transaction>> GetTransaction(int id)
         {
@@ -58,7 +58,7 @@ namespace LibraryManager.API.Controllers
                 UserId = s.UserId,
                 UserFullName = s.User.FullName,
                 CheckoutDate = s.CheckoutDate,
-                DueDate = s.DueDate,               
+                DueDate = s.DueDate,
                 LastRenewedDate = s.LastRenewedDate,
                 RenewalCount = s.RenewalCount
             }).OrderByDescending(x => x.CheckoutDate).ToListAsync();
@@ -76,36 +76,11 @@ namespace LibraryManager.API.Controllers
             return false;
         }
 
-        //[HttpGet()]
-        //[Route("[action]/{isbn}")]
-        //public async Task<ActionResult<bool>> CheckIfBookCanBeRenewed(int isbn)
-        //{
-        //    //   var result = await _context.Transactions.Where(x => x.Book.Isbn == isbn
-        //    //&& (x.TxnStatusId == 1 || x.TxnStatusId == 2)).ToListAsync();
-
-        //    //   if (result.Any())
-        //    //       return true;
-        //    //   return false;
-
-        //    var txn = await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).FirstOrDefaultAsync();
-        //    if (txn == null) return false;
-        //    if (txn.RenewalCount >= 6)
-        //    {
-        //        return false;
-        //    }
-
-        //    return true;
-
-        //}
-
         [HttpGet()]
         [Route("[action]/{isbn}")]
         public async Task<ActionResult<Transaction>> CheckIfBookCanBeRenewed(int isbn)
-        {          
-
+        {
             return await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).FirstOrDefaultAsync();
-          
-
         }
 
         [HttpGet()]
@@ -113,13 +88,35 @@ namespace LibraryManager.API.Controllers
         public async Task<ActionResult<Transaction>> GetActiveTransaction(int isbn)
         {
             return await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2)).FirstOrDefaultAsync();
+        }
 
-
+        [HttpGet()]
+        [Route("[action]/{isbn}")]
+        public async Task<ActionResult<BookItemDto>> GetActiveTransactionBookItem(int isbn)
+        {
+            return await _context.Transactions.Where(x => x.Book.Isbn == isbn && (x.TxnStatusId == 1 || x.TxnStatusId == 2))
+                .Select(x => new BookItemDto
+                {
+                    BookId = x.Book.BookId,
+                    ISBN = x.Book.Isbn,
+                    Title = x.Book.Title,
+                    Author = x.Book.Author,
+                    Category = x.Book.Category,
+                    PublishedYear = x.Book.PublishedYear,
+                    Publisher = x.Book.Publisher,
+                    Price = x.Book.Price,
+                    CheckoutDate = x.CheckoutDate,
+                    DueDate = x.DueDate,
+                    LastRenewedDate = x.LastRenewedDate,
+                    RenewalCount = x.RenewalCount,
+                    UserFullName = x.User.FullName,
+                    UserId = x.UserId,
+                    TxnId = x.TxnId
+                }).FirstOrDefaultAsync();
         }
 
 
-        // PUT: api/Transactions/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PUT 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTransaction(int id, Transaction transaction)
         {
@@ -152,7 +149,6 @@ namespace LibraryManager.API.Controllers
 
 
         // POST: api/Transactions
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Transaction>> PostTransaction(Transaction transaction)
         {
@@ -160,23 +156,7 @@ namespace LibraryManager.API.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTransaction", new { id = transaction.TxnId }, transaction);
-        }
-
-        // DELETE: api/Transactions/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTransaction(int id)
-        {
-            var transaction = await _context.Transactions.FindAsync(id);
-            if (transaction == null)
-            {
-                return NotFound();
-            }
-
-            _context.Transactions.Remove(transaction);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
+        }      
 
         private bool TransactionExists(int id)
         {
